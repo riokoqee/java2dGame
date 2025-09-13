@@ -13,6 +13,8 @@ public class Player extends Entity{
     GamePanel gp;
     KeyHandler keyH;
 
+    int scale = 2;
+
     public final int screenX;
     public final int screenY;
 
@@ -21,8 +23,8 @@ public class Player extends Entity{
         this.gp = gp;
         this.keyH = keyH;
 
-        screenX = gp.screenWidth/2 - (gp.tileSize/2);
-        screenY = gp.screenHeight/2 - (gp.tileSize/2);
+        screenX = gp.screenWidth/2 - (gp.tileSize * scale / 2);
+        screenY = gp.screenHeight/2 - (gp.tileSize * scale / 2);
 
         setDefaultValues();
         getPlayerImage();
@@ -122,9 +124,11 @@ public class Player extends Entity{
                     image = right2;
                 }
                 break;
+
+
         }
-        int playerWidth = gp.tileSize * 2;   // в 2 раза шире
-        int playerHeight = gp.tileSize * 2;  // в 2 раза выше
+        int playerWidth = gp.tileSize * scale;
+        int playerHeight = gp.tileSize * scale;
 
         g2.drawImage(image, screenX, screenY, playerWidth, playerHeight, null);
     }
