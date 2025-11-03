@@ -3,6 +3,8 @@ package entity;
 import main.GamePanel;
 import main.KeyHandler;
 import main.UtilityTool;
+import object.OBJ_Shield_Wood;
+import object.OBJ_Sword_Normal;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -14,6 +16,7 @@ public class Player extends Entity{
     KeyHandler keyH;
     public final int screenX;
     public final int screenY;
+    public boolean attackCanceled = false;
 
     public Player(GamePanel gp, KeyHandler keyH) {
 
@@ -50,9 +53,27 @@ public class Player extends Entity{
         direction = "down";
 
         // PLAYER STATUS
+        level = 1;
         maxLife = 6;
         life = maxLife;
+        strength = 1; // чем больше сила, тем больше ответственность
+        dexterity = 1;
+        exp = 0;
+        nextLevelExp = 5;
+        coin = 0;
+        currentWeapon = new OBJ_Sword_Normal(gp);
+        currentShield = new OBJ_Shield_Wood(gp);
+        attack = getAttack();
+        defense = getDefense();
     }
+
+    public int getAttack() {
+        return attack = strength * currentWeapon.attackValue;
+    }
+    public int getDefense() {
+        return defense = dexterity * currentShield.defenseValue;
+    }
+
     public void getPlayerImage() {
 
         up1 = setup("/player/boy_up_1", gp.tileSize, gp.tileSize);
@@ -83,7 +104,7 @@ public class Player extends Entity{
             attacking();
         }
 
-        if (keyH.upPressed == true || keyH.downPressed == true ||
+        else if (keyH.upPressed == true || keyH.downPressed == true ||
                 keyH.leftPressed == true || keyH.rightPressed == true || keyH.enterPressed == true) {
 
             if(keyH.upPressed == true) {
@@ -129,6 +150,13 @@ public class Player extends Entity{
             }
         }
 
+        if (keyH.enterPressed == true && attackCanceled == false) {
+            gp.playSE(7);
+            attacking = true;
+            spriteCounter = 0;
+        }
+
+        attackCanceled = false;
         gp.keyH.enterPressed = false;
 
             spriteCounter++;
@@ -210,11 +238,9 @@ public class Player extends Entity{
 
         if (gp.keyH.enterPressed == true) {
             if (i != 999) {
+                    attackCanceled = true;
                     gp.gameState = gp.dialogueState;
                     gp.npc[i].speak();
-            }
-            else {
-                attacking = true;
             }
         }
     }
@@ -224,7 +250,13 @@ public class Player extends Entity{
         if (i != 999) {
 
             if (invincible == false) {
-                life -= 1;
+                gp.playSE(6);
+
+                int damage = gp.monster[i].attack - defense;
+                if (damage < 0) {
+                    damage = 0;
+                }
+                life -= damage;
                 invincible = true;
             }
         }
@@ -236,13 +268,44 @@ public class Player extends Entity{
 
             if (gp.monster[i].invincible == false) {
 
-                gp.monster[i].life -= 1;
+                gp.playSE(8);
+
+                int damage = attack - gp.monster[i].defense;
+                if (damage < 0) {
+                    damage = 0;
+                }
+                gp.monster[i].life -= damage;
+                gp.ui.addMessage(damage + " damage!");
+
                 gp.monster[i].invincible = true;
+                gp.monster[i].damageReaction();
 
                 if (gp.monster[i].life <= 0) {
-                    gp.monster[i] = null;
+                    gp.monster[i].dying = true;
+                    gp.ui.addMessage("Killed the " + gp.monster[i].name + "!");
+                    gp.ui.addMessage("Exp + " + gp.monster[i].exp);
+                    exp += gp.monster[i].exp;
+                    checkLevelUp();
                 }
             }
+        }
+    }
+
+    public void checkLevelUp() {
+
+        if (exp >= nextLevelExp) {
+
+            level++;
+            nextLevelExp = nextLevelExp*2;
+            maxLife += 2;
+            strength++;
+            dexterity++;
+            attack = getAttack();
+            defense = getDefense();
+
+            gp.playSE(9);
+            gp.gameState = gp.dialogueState;
+            gp.ui.currentDialogue = "You are level " + level + " now!\n" + "You feel stronger!";
         }
     }
 
