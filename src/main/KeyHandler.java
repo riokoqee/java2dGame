@@ -110,6 +110,10 @@ public class KeyHandler implements KeyListener {
         // PAUSE STATE
         if (gp.gameState == gp.pauseState) {
             if (code == KeyEvent.VK_ESCAPE) {
+                gp.gameState = gp.pauseState;
+            }
+
+            else if (gp.gameState == gp.pauseState) {
                 gp.gameState = gp.playState;
             }
         }
