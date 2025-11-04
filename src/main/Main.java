@@ -3,14 +3,23 @@ package main;
 import javax.swing.*;
 
 public class Main{
+
+    public static JFrame window;
+
     public static void main(String[] args){
-        JFrame window = new JFrame();
+        window = new JFrame();
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         window.setResizable(false);
-        window.setTitle("Please 100 ballow");
+        window.setTitle("Please 100 ballov");
+
 
         GamePanel gamePanel = new GamePanel();
         window.add(gamePanel);
+
+        gamePanel.config.loadConfig();
+        if (gamePanel.fullScreenOn == true) {
+            window.setUndecorated(true);
+        }
 
         window.pack();
 

@@ -47,7 +47,7 @@ public class Player extends Entity{
 
         worldX = gp.tileSize * 23;
         worldY = gp.tileSize * 21;
-//        worldX = gp.tileSize * 10;
+//        worldX = gp.tileSize * 12;
 //        worldY = gp.tileSize * 13;
         speed = 4;
         direction = "down";
@@ -65,6 +65,17 @@ public class Player extends Entity{
         currentShield = new OBJ_Shield_Wood(gp);
         attack = getAttack();
         defense = getDefense();
+    }
+
+    public void setDefaultPositions() {
+        worldX = gp.tileSize * 23;
+        worldY = gp.tileSize * 21;
+        direction = "down";
+    }
+
+    public void restoreLife() {
+        life = maxLife;
+        invincible = false;
     }
 
     public int getAttack() {
@@ -178,6 +189,13 @@ public class Player extends Entity{
                 invincibleCounter = 0;
             }
         }
+
+        if (life <= 0) {
+            gp.gameState = gp.gameOverState;
+            gp.ui.commandNum = -1;
+            gp.stopMusic();
+            gp.playSE(11);
+        }
     }
 
     public void attacking() {
@@ -240,7 +258,7 @@ public class Player extends Entity{
             if (i != 999) {
                     attackCanceled = true;
                     gp.gameState = gp.dialogueState;
-                    gp.npc[i].speak();
+                    gp.npc[gp.currentMap][i].speak();
             }
         }
     }
@@ -252,7 +270,7 @@ public class Player extends Entity{
             if (invincible == false) {
                 gp.playSE(6);
 
-                int damage = gp.monster[i].attack - defense;
+                int damage = gp.monster[gp.currentMap][i].attack - defense;
                 if (damage < 0) {
                     damage = 0;
                 }
@@ -266,25 +284,25 @@ public class Player extends Entity{
 
         if (i != 999) {
 
-            if (gp.monster[i].invincible == false) {
+            if (gp.monster[gp.currentMap][i].invincible == false) {
 
                 gp.playSE(8);
 
-                int damage = attack - gp.monster[i].defense;
+                int damage = attack - gp.monster[gp.currentMap][i].defense;
                 if (damage < 0) {
                     damage = 0;
                 }
-                gp.monster[i].life -= damage;
+                gp.monster[gp.currentMap][i].life -= damage;
                 gp.ui.addMessage(damage + " damage!");
 
-                gp.monster[i].invincible = true;
-                gp.monster[i].damageReaction();
+                gp.monster[gp.currentMap][i].invincible = true;
+                gp.monster[gp.currentMap][i].damageReaction();
 
-                if (gp.monster[i].life <= 0) {
-                    gp.monster[i].dying = true;
-                    gp.ui.addMessage("Killed the " + gp.monster[i].name + "!");
-                    gp.ui.addMessage("Exp + " + gp.monster[i].exp);
-                    exp += gp.monster[i].exp;
+                if (gp.monster[gp.currentMap][i].life <= 0) {
+                    gp.monster[gp.currentMap][i].dying = true;
+                    gp.ui.addMessage("Killed the " + gp.monster[gp.currentMap][i].name + "!");
+                    gp.ui.addMessage("Exp + " + gp.monster[gp.currentMap][i].exp);
+                    exp += gp.monster[gp.currentMap][i].exp;
                     checkLevelUp();
                 }
             }
